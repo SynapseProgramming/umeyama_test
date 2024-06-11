@@ -20,11 +20,21 @@ public:
     Umeyama();
 
     void timerCallback();
+    void transformCloud(
+        pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+        pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed_cloud,
+        const Eigen::Matrix4f &transform);
+
+    void toRosPcl(const pcl::PointCloud<pcl::PointXYZ>::Ptr &pcl_cloud, sensor_msgs::msg::PointCloud2 &ros_cloud);
 
 private:
     rclcpp::TimerBase::SharedPtr m_timer;
     std::unique_ptr<tf2_ros::TransformBroadcaster> m_tf_broadcaster;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr m_source_pub;
+    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr m_target_pub;
     geometry_msgs::msg::TransformStamped m_t;
-    sensor_msgs::msg::PointCloud2 m_rect_cloud;
+    sensor_msgs::msg::PointCloud2 m_target_cloud;
+    sensor_msgs::msg::PointCloud2 m_source_cloud;
+
+    Eigen::Matrix4f m_transform;
 };
