@@ -46,8 +46,50 @@ Umeyama::Umeyama() : Node("umeyama")
     toRosPcl(rect_cloud, m_target_cloud);
 
     // source cloud
-    // pcl::PointCloud<pcl::PointXYZ>::Ptr trans_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    // transformCloud(rect_cloud, trans_cloud, m_transform);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr trans_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    transformCloud(rect_cloud, trans_cloud, m_transform);
+
+    Eigen::Matrix4f final_transformation;
+    const pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,
+                                                         pcl::PointXYZ>
+        svd_est(false);
+
+    svd_est.estimateRigidTransformation(*trans_cloud, *rect_cloud, final_transformation);
+
+    // print out the final transformation
+    double x_translation = final_transformation(0, 3);
+    double y_translation = final_transformation(1, 3);
+    double z_translation = final_transformation(2, 3);
+
+    Eigen::Matrix3f correction_rotation_matrix =
+        final_transformation.block<3, 3>(0, 0);
+
+    Eigen::Matrix3f original_rotation_matrix =
+        m_transform.block<3, 3>(0, 0);
+
+    Eigen::Matrix3f corrected_rotation_matrix =
+        correction_rotation_matrix * original_rotation_matrix;
+
+    std::cout << "x_translation: " << x_translation << std::endl;
+    std::cout << "y_translation: " << y_translation << std::endl;
+    std::cout << "z_translation: " << z_translation << std::endl;
+
+    // corrected translation
+    Eigen::Vector3f corrected_translation = correction_rotation_matrix * translation.vector() + Eigen::Vector3f(x_translation, y_translation, z_translation);
+    // print out the correction translation
+    std::cout << "corrected x_translation: " << corrected_translation(0) << std::endl;
+    std::cout << "corrected y_translation: " << corrected_translation(1) << std::endl;
+    std::cout << "corrected z_translation: " << corrected_translation(2) << std::endl;
+
+    // print out rpy values of corrected rotation matrix
+    Eigen::Vector3f euler_angles = corrected_rotation_matrix.eulerAngles(2, 1, 0);
+
+    float yaw = euler_angles[0];
+    float pitch = euler_angles[1];
+    float roll = euler_angles[2];
+    std::cout << "roll: " << roll << " pitch: " << pitch << " yaw: " << yaw
+              << std::endl;
+
     toRosPcl(rect_cloud, m_source_cloud);
 }
 
