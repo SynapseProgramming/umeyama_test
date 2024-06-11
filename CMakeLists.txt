@@ -18,6 +18,8 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(pcl_conversions REQUIRED)
 find_package(PCL REQUIRED)
 
 if(BUILD_TESTING)
@@ -33,7 +35,7 @@ if(BUILD_TESTING)
 endif()
 
 add_executable(ume src/umeyama.cpp src/umeyama_node.cpp)
-ament_target_dependencies(ume rclcpp tf2_geometry_msgs tf2_ros tf2 Eigen3 PCL)
+ament_target_dependencies(ume rclcpp tf2_geometry_msgs tf2_ros tf2 Eigen3 PCL sensor_msgs pcl_conversions)
 target_include_directories(ume
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
